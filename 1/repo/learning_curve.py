@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt		# For plotting the data
 from sklearn.model_selection import learning_curve
 from sklearn.model_selection import ShuffleSplit
 
-def learn_cur(model, title, X, y, ylim=None, cv=None, n_jobs=1, train_sizes=np.linspace(.1, 1.0, 10)):
+def learn_cur(model, title, X, y, label=None, ylim=None, cv=None, n_jobs=1, train_sizes=np.linspace(.1, 1.0, 10)):
 								# ylim : tuple, shape (ymin, ymax), optional. Defines minimum and maximum yvalues plotted.
 
 	# Cross validation with 100 iterations to get smoother mean test and train
@@ -11,10 +11,10 @@ def learn_cur(model, title, X, y, ylim=None, cv=None, n_jobs=1, train_sizes=np.l
 	cv = ShuffleSplit(n_splits=10, test_size=0.2, random_state=0)
 
 	plt.figure()
-	plt.title(title)
+	plt.title(title + " " +label)
 	if ylim is not None:
 		plt.ylim(*ylim)
-	plt.xlabel("Training examples")
+	plt.xlabel("Training examples ")
 	plt.ylabel("Score")
 	train_sizes, train_scores, test_scores = learning_curve(
 		model, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
@@ -36,7 +36,7 @@ def learn_cur(model, title, X, y, ylim=None, cv=None, n_jobs=1, train_sizes=np.l
 
 	plt.legend(loc="best")
 
-	print "\nCheck out the graph popped up\n"
+	print "Check out the graph popped up"
 	plt.show()
 
 	return plt

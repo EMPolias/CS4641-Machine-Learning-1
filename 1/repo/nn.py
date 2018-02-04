@@ -8,7 +8,9 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_val_score
 from sklearn.cross_validation import train_test_split
 from sklearn.neural_network import MLPClassifier	# For Neural Network
-import learning_curve
+import matplotlib.pyplot as plt		# For plotting the data
+from sklearn.model_selection import learning_curve
+from sklearn.model_selection import ShuffleSplit
 
 EPISODE_NUM = 10
 TITLE = "Learning Curve (Neural Network)"
@@ -17,12 +19,76 @@ def neural_network(dataset):
 	numOfFeature = dataset.shape[1]-1
 	X = dataset[:,0:numOfFeature]
 	y = dataset[:,numOfFeature]
+	X = preprocess_data(X)
 	X_train,X_test,y_train,y_test = train_test_split(X,y, random_state=EPISODE_NUM)
+	# X_train,X_test = preprocess_feature(X_train,X_test)
 
-	model = MLPClassifier(solver='adam', activation='relu', hidden_layer_sizes = (1000,), learning_rate = 'invscaling' ,max_iter = 1000, alpha = 1e-5)
+	model = MLPClassifier(activation='relu', alpha=1e-05, batch_size='auto',
+		beta_1=0.9, beta_2=0.999, early_stopping=False,
+		epsilon=1e-08, hidden_layer_sizes=(15,), learning_rate='constant',
+		learning_rate_init=0.01, max_iter=200, momentum=0.9,
+		nesterovs_momentum=True, power_t=0.5, random_state=1, shuffle=True,
+		solver='lbfgs', tol=0.0001, validation_fraction=0.1, verbose=False,
+		warm_start=False)
 	fit_model(model,X_train,y_train,X_test,y_test)
 	score_model(model,X,y)
-	learning_curve.learn_cur(model,TITLE,X,y)
+	label = "L=0.01,L=(15,)"
+	learn_cur(model,TITLE,X,y,label)
+
+	model = MLPClassifier(activation='relu', alpha=1e-05, batch_size='auto',
+		beta_1=0.9, beta_2=0.999, early_stopping=False,
+		epsilon=1e-08, hidden_layer_sizes=(10,), learning_rate='constant',
+		learning_rate_init=0.01, max_iter=200, momentum=0.9,
+		nesterovs_momentum=True, power_t=0.5, random_state=1, shuffle=True,
+		solver='lbfgs', tol=0.0001, validation_fraction=0.1, verbose=False,
+		warm_start=False)
+	label = "L=0.01,L=(10,)"
+	learn_cur(model,TITLE,X,y,label)
+
+	model = MLPClassifier(activation='relu', alpha=1e-05, batch_size='auto',
+		beta_1=0.9, beta_2=0.999, early_stopping=False,
+		epsilon=1e-08, hidden_layer_sizes=(20,), learning_rate='constant',
+		learning_rate_init=0.1, max_iter=200, momentum=0.9,
+		nesterovs_momentum=True, power_t=0.5, random_state=1, shuffle=True,
+		solver='lbfgs', tol=0.0001, validation_fraction=0.1, verbose=False,
+		warm_start=False)
+	label = "L=0.01,L=(20,)"
+	learn_cur(model,TITLE,X,y,label)
+
+	model = MLPClassifier(activation='relu', alpha=1e-05, batch_size='auto',
+		beta_1=0.9, beta_2=0.999, early_stopping=False,
+		epsilon=1e-08, hidden_layer_sizes=(15,2), learning_rate='constant',
+		learning_rate_init=0.3, max_iter=200, momentum=0.9,
+		nesterovs_momentum=True, power_t=0.5, random_state=1, shuffle=True,
+		solver='lbfgs', tol=0.0001, validation_fraction=0.1, verbose=False,
+		warm_start=False)
+	label = "L=0.1,L=(15,2)"
+	learn_cur(model,TITLE,X,y,label)
+
+	model = MLPClassifier(activation='relu', alpha=1e-05, batch_size='auto',
+		beta_1=0.9, beta_2=0.999, early_stopping=False,
+		epsilon=1e-08, hidden_layer_sizes=(15,3), learning_rate='constant',
+		learning_rate_init=0.3, max_iter=200, momentum=0.9,
+		nesterovs_momentum=True, power_t=0.5, random_state=1, shuffle=True,
+		solver='lbfgs', tol=0.0001, validation_fraction=0.1, verbose=False,
+		warm_start=False)
+	label = "L=0.1,L=(15,3)"
+	learn_cur(model,TITLE,X,y,label)
+
+	plt.show()
+	print "Check out the graph popped up"
+
+def preprocess_data(X):
+	scaler = StandardScaler().fit(X)
+	return scaler.transform(X)
+
+def preprocess_feature(X_train,X_test):
+	# Preprocess the Features
+	scaler = StandardScaler().fit(X_train)
+	X_train = scaler.transform(X_train)	# Rescale the data
+	X_test = scaler.transform(X_test)
+	return X_train,X_test
+
 
 def score_model(model,X,y):
 	cv_scores = cross_val_score(model,X,y,cv=EPISODE_NUM)
@@ -31,7 +97,7 @@ def score_model(model,X,y):
 
 
 def fit_model(model,X_train,y_train,X_test,y_test):
-	print "Trainning size:\t"
+	print "Training size:\t"
 	print X_train.shape[0]
 	model.fit(X_train,y_train)
 	accu = accuracy_score(y_test,model.predict(X_test))
@@ -40,13 +106,8 @@ def fit_model(model,X_train,y_train,X_test,y_test):
 
 	return accu
 
-def preprocess_feature(X):
-	# Preprocess the Features
-	scaler = StandardScaler().fit(X)
-	X = scaler.transform(X)	# Rescale the data
-	return X
 
-def learn_cur(model, title, X, y, ylim=None, cv=None, n_jobs=1, train_sizes=np.linspace(.1, 1.0, 10)):
+def learn_cur(model, title, X, y, label=None, ylim=None, cv=None, n_jobs=1, train_sizes=np.linspace(.1, 1.0, 10)):
 								# ylim : tuple, shape (ymin, ymax), optional. Defines minimum and maximum yvalues plotted.
 
 	# Cross validation with 100 iterations to get smoother mean test and train
@@ -54,10 +115,10 @@ def learn_cur(model, title, X, y, ylim=None, cv=None, n_jobs=1, train_sizes=np.l
 	cv = ShuffleSplit(n_splits=10, test_size=0.2, random_state=0)
 
 	plt.figure()
-	plt.title(title)
+	plt.title(title + label)
 	if ylim is not None:
 		plt.ylim(*ylim)
-	plt.xlabel("Training examples")
+	plt.xlabel("Training examples ")
 	plt.ylabel("Score")
 	train_sizes, train_scores, test_scores = learning_curve(
 		model, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
@@ -78,8 +139,7 @@ def learn_cur(model, title, X, y, ylim=None, cv=None, n_jobs=1, train_sizes=np.l
 			 label="Cross-validation score")
 
 	plt.legend(loc="best")
-	plt.show()
-	print "Check out the graph popped up"
+
 	return plt
 
 if __name__ == '__main__':

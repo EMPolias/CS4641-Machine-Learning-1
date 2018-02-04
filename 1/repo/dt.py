@@ -20,17 +20,21 @@ def decision_tree(dataset):
 	y = dataset[:,numOfFeature]
 	X_train,X_test,y_train,y_test = train_test_split(X,y, random_state=EPISODE_NUM)
 
-	# model = DecisionTreeClassifier()
-	model = DecisionTreeClassifier(max_depth=50)
+	model = DecisionTreeClassifier()
+	# model = DecisionTreeClassifier(max_depth=10,max_leaf_nodes=None,min_impurity_decrease=0)
 	fit_model(model,X_train,y_train,X_test,y_test)
-	# score_model(model,X,y)
+	model_report(model)
 	class_report(model,X_test,y_test)
-	learning_curve.learn_cur(model,TITLE,X,y)
+	# learning_curve.learn_cur(model,TITLE,X,y)
 
 def score_model(model,X,y):
 	cv_scores = cross_val_score(model,X,y,cv=EPISODE_NUM)
 	print "Cross Validation Scores:"
 	print cv_scores
+
+def model_report(model):
+	print "\nnode#\t|depth"
+	print str(model.tree_.node_count) + "\t|" + str(model.tree_.max_depth)
 
 def class_report(model,X_test,y_test):
 	# Boosting: many many weak classifiers (max_depth=1) refine themselves sequentially
@@ -40,7 +44,7 @@ def class_report(model,X_test,y_test):
 
 
 def fit_model(model,X_train,y_train,X_test,y_test):
-	print "Trainning size:\t"
+	print "Training size:\t"
 	print X_train.shape[0]
 	model.fit(X_train,y_train)
 	accu = accuracy_score(y_test,model.predict(X_test))
