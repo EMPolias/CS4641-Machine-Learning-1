@@ -1,0 +1,3 @@
+*.py[cod]
+card.csv
+.DS_Store
