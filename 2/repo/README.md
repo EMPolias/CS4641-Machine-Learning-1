@@ -40,9 +40,9 @@ To run the code for determining optimal weights for neural networks, set MATLAB\
 
 There are three problems: "traveling_salesman", "four_peaks", "flip_flop"
 To run the code for each problem, go to ABAGAIL folder and run command:
-	'sh run_[problem name].sh'
+	`sh run_[problem name].sh`
 Or call the following command to run all problems one by one (this may take a long time):
-	'sh run.sh'
+	`sh run.sh`
 
 
 ## Author
